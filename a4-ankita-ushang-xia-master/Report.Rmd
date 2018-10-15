@@ -1,0 +1,151 @@
+---
+title: "Assignment 4: Flight Data Analysis"
+author: "Ankita, Ushang, Xia"
+date: "10/13/2017"
+output: 
+ html_document:
+    toc: true
+    toc_depth: 3
+    # theme: united  # many options for theme, this one is my favorite.
+    # highlight: tango  # specifies the syntax highlighting style
+---
+
+###<span style = "color:#588bae">Objective</span> 
+   Implement a pipeline that runs on a set of psuedo-distributed Map Reduce tasks to plot the mean delay of the 5 most active airline and for the five most active airports in the country. 
+ 
+###<span style = "color:#588bae">Implementation</span>
+   The entire execution is carried out in 2 map reduce stages.
+ 
+#### Stage 1: Active airlines and airports
+#### Map:
+  - The map function in the first stage reads the input CSV line by line, parses it and counts the flight frequency per airline and per airport.
+
+#### Partition:
+  - In this phase, the partition class, partitions the key from the mapper into two different reducers by using the string "AL" and "AP" appended to the keys.
+
+#### Reduce:
+  - The reduce function gets an airline/airport as key and list of frequncies as value.
+  - It adds the frequency value and finds the total frequency count of each airline and airport in the dataset.
+    
+#### Stage 2: Average monthly flight delay
+#### Map:
+  - In the setup function of the mapper, we read the output of phase 1, sort it and find the top 5 airlines and airports.
+  - Then map function in the first stage reads each record and pre-processes it to see if it passes the sanity test and then sets it to the approriate Airline and/or Airport hashmap based on the calculated top 5 airport and airline.
+
+#### Partition:
+  - In this phase, the partition class, partitions each airport or airline by the month.
+  - For example, for all airlines, the data for January goes to reducer 0 and so on till reducer 11 for December.
+  - Similiarly for all airports, the data for Januar goes to recuder 12 and so on till reducer 23 for December.
+  - The partitioner finds out whether the current record is for airport or airline by the first 2 characters in the key which are made either "AP" or "AL" and find out the month as the 4th element in the key when split on "_" since key is either AL_<AIRLINE>_<AIRPORT>_<MONTH>_<YEAR> or AP_<AIRPORT>_<AIRLINE>_<MONTH>_<YEAR>
+
+#### Reduce:
+  - The reduce function the reducer aggregrates all the normalized delays and the reduced flights for each airport and airline and finds the mean normalized delay for the same after which it writes these values to a comma seperated file as output.
+  
+###<span style = "color:#588bae">Observation</span>
+ As we explore the world of airline on-time performance, we come across a number of factors that affects the issue of flight delay's :
+  - airport capacity, weather condition, week influence, time influence, distance influence and regional influence.
+  - So while calculating the mean delay of flight for each airport and airline, we should consider these factors to get a better understanding of trends and reasons for the delays.
+  - From the results of top 5 airlines, we can see that there is no significant slope showing the reduction in the delay time over the past 28 years.
+  - It seems from the graphs below, that the year 1999-2002 had a signifant increase in the delays than particularly when taking into consideration that the level of airline delays had been decreasing over the past year.
+  - Also some seasonal trends can be observed from the data that during winters, there are a high chance of flight delays and cancellations due to weather condition or high traffic, while april-june months show less delays and cancellations.
+
+###<span style = "color:#588bae">Visualization</span>
+
+```{r setup, include=FALSE, echo=FALSE,warning=FALSE,message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+suppressWarnings(library(dplyr))
+suppressWarnings(library(ggplot2))
+suppressWarnings(library(plotly))
+
+```
+
+
+```{r plot2,echo=FALSE,warning=FALSE,message = FALSE}
+results <- read.csv("output_csv/airline_output.csv", header = FALSE) %>%
+rename(Airlines=V1, Airports=V2, month=V3, year=V4, normalizeDelay=V5) %>% 
+collect
+results1 <- read.csv("output_csv/airport_output.csv", header = FALSE) %>%
+rename(Airports=V1, Airlines=V2, month=V3, year=V4, normalizeDelay=V5) %>% 
+collect
+```
+
+#### Top 5 Airlines
+
+  - The plots below show the normalized delay for each of the top 5 five airlines at its 9 most frequent airports for the past 28 years.
+  - The color gradient helps identify the frequency of the the flights at the given airports - darker the color - higher the frequency. 
+  - So when we select any single airport from a list of legends on the right, we can see the trend of normalized delays at that airport over the span of 28 years of the respective airline.
+
+
+
+
+```{r, echo=FALSE,warning=FALSE,message = FALSE}
+plotAirline <-function(lines) {
+runs <- results %>% filter(Airlines == lines)%>% select(Airlines, Airports, month, year, normalizeDelay)
+q <- tail(names(sort(table(runs$Airports))), 9)
+runs <- runs[is.element(runs$Airports,q),]
+g <- ggplot(runs, aes(x = year, y = normalizeDelay, color =Airports )) + geom_point()+scale_colour_brewer(palette = "Greens")+xlim(1989,2017)+ylim(0,1.5)+ggtitle(as.character(lines))+theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=20, hjust=0)) 
+ggplotly(g)
+}
+```
+
+```{r, echo=FALSE,warning=FALSE,message = FALSE}
+topAirlines <-unique(results$Airlines)
+plotAirline(topAirlines[1])
+plotAirline(topAirlines[2])
+plotAirline(topAirlines[3])
+plotAirline(topAirlines[4])
+plotAirline(topAirlines[5])
+
+runs <- results %>% filter(Airlines %in% topAirlines)  %>% select(normalizeDelay, Airlines)
+ggplot(runs, aes(x=Airlines, y=normalizeDelay)) + geom_violin()+ylim(0,0.5)
+```
+
+The above voilin plots gives a general idea of the normalized dealy distribuiled for each airline.
+
+#### Top 5 Airports
+
+- The plots below show the normalized delay for each at the top 5 five airports by its 9 most frequent airlines for the past 28 years.
+- The color gradient helps identify the frequency of the the flights at the given airports - darker the color - higher the frequency. 
+- So when we select any single airline from a list of legends on the right, we can see the trend of normalized delays by that airline at the respective airport over the span of 28 years.
+
+```{r, echo=FALSE,warning=FALSE,message = FALSE}
+plotAirport <-function(lines) {
+runs <- results1 %>% filter(Airports == lines)%>% select(Airports, Airlines, month, year, normalizeDelay)
+q <- tail(names(sort(table(runs$Airlines))), 9)
+runs <- runs[is.element(runs$Airlines,q),]
+g <- ggplot(runs, aes(x = year, y = normalizeDelay, color =Airlines )) + geom_point()+scale_colour_brewer(palette = "Oranges")+xlim(1989,2017)+ylim(0,1.5)+ggtitle(as.character(lines))+theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=20, hjust=0)) 
+ggplotly(g)
+}
+```
+
+```{r, echo=FALSE,warning=FALSE,message = FALSE}
+topAirports <- unique(results1$Airports)
+plotAirport(topAirports[1])
+plotAirport(topAirports[2])
+plotAirport(topAirports[3])
+plotAirport(topAirports[4])
+plotAirport(topAirports[5])
+
+runs <- results1 %>% filter(Airports %in% topAirports)  %>% select(normalizeDelay, Airports)
+ggplot(runs, aes(x=Airports, y=normalizeDelay)) + geom_violin()+ylim(0,0.5)
+```
+
+The plots above gives a general idea of the normalized dealy distribuiled for each airports
+
+###<span style = "color:#588bae">AWS Execution Environment Specifications</span>
+
+* Master Node:
+  m4.xlarge
+  8 vCPU, 16 GiB memory, EBS only storage
+  EBS Storage:100 GiB
+* Data Nodes(2 or 4): 
+  m4.2xlarge
+  16 vCPU, 32 GiB memory, EBS only storage
+  EBS Storage:100 GiB
+
+### <span style='color:#588BAE'>Local Execution Environment Specifications:</span>
+
+* Macintosh 2.5Ghz i7 Quad Core
+* 16 GB RAM
+* macOS Sierra Version 10.12.6
+* Java 8 Update 144
