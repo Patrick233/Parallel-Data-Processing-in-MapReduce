@@ -1,0 +1,15 @@
+---
+title: "report"
+author: "Yang Xia"
+date: "2017/9/29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I can't construct it on aws, still processing.
+But the sudo-version takes 2 hours to complete.
+
+
