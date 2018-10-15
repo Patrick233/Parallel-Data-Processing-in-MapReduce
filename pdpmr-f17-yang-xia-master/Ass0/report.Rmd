@@ -1,0 +1,92 @@
+---
+title: "Sequential VS Concurrent Report"
+author: "Yang Xia"
+date: "9/21/2017"
+output: html_document
+---
+This is the CS6240 Assigment A1 report written in RMarkDown.
+This program is first run on my personal computer, which is a MacBook Pro with 2.5GH Intel Core i5 with 2 core. I used JAVA 8.
+
+Design of Evaluated program:
+1. Set up the enviroment, unzip the file;
+2. Evaluate the result of sequential solution(take the average of 20 run)
+3. Evaluate the result of concurrent solution(take the average of 10 run, change the thread from 2 to 16)
+4. Dive deep into the difference between sequential solution and 2-thread-concurrent solution.
+5. Draw Conclusions.
+
+First we have the enviroment set up, i.e compile all the java files, unzip books.
+
+```{bash}
+javac src/*.java
+gunzip input/*
+```
+
+We'll first take a look at the result of sequential result. I run the program 20 times and have the result store in a csv file called "SequentialResult".
+
+```{bash}
+java -cp src Sequential
+```
+
+Read the result and store them in SequentialResult and plot as a histgram.
+```{r}
+SequentialResult=read.csv("SequentialResult.csv")
+hist(SequentialResult[,1])
+Seq_mean = mean(SequentialResult[,1])
+Seq_var = var(SequentialResult[,1])
+sprintf("The average run time is: %f", Seq_mean)
+```
+
+Then do the same thing on a concurrent model, change the thread usage from 2 to 16.
+The result are stored in the corresponding "Concurrent_k_thread.csv".
+```{bash}
+for i in {2..16}
+do java -cp src Concurrent $i
+done
+```
+
+Retrive the results that we just got, calculate their average time and plot them.
+```{r}
+average = vector("numeric",16)
+variance = vector("numeric",16)
+for (thread in 2:16){
+  name = paste("Concurrent_",thread,"_thread.csv",sep="")
+  temp_avg = mean(read.csv(name)[,1])
+  temp_var = var(read.csv(name)[,1])
+  average[thread] = temp_avg
+  variance[thread] = temp_var
+}
+
+plot(average)
+plot(variance)
+```
+
+Now we compare the result of sequential solution and that of 2-thread-concurrent solution.
+```{r}
+twothread = read.csv("Concurrent_2_thread.csv")[,1]
+
+plot(SequentialResult[,1],type = "l",col="red")
+lines(twothread,col="green")
+
+sprintf("The difference in average run time is: %f", Seq_mean-mean(twothread))
+sprintf("The difference in variance is: %f", Seq_var-var(twothread))
+```
+
+After all is done, zip the file to save spaces.
+```{bash}
+gzip input/*
+```
+
+Conclusions:
+The difference in the execution profiles among variants: the number of threads being used is different
+
+Comment on the differences in performance of the sequential and parallel/concurrent variants: in my case, since I introduced concurrency only during the reading phrase, the performance doesn't improved much. My guess is the bottle neck in reading is the bandwidth instead of cpu.
+
+Comment on the impact of the number of executor threads on performance:
+Ideally, the more threads you use, the faster you can get. But in realistic this is not true since the number of core of your cpu is fixed, and using more threads also introduce overhead.
+Plus, in this case, most of the runtime was spent on outputting the result, in which concurrency doesn't help.
+
+Explain which implementation variant and configuration have the best combination of performance and stability:
+On my computer, use 4 threads gives best result. Since it makes full use of cpu(mine's 2 core so I can't expect much) while doesn't introduce much overhead.
+
+
+

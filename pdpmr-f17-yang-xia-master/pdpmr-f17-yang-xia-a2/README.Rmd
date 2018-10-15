@@ -1,0 +1,15 @@
+---
+title: "ReadMe"
+author: "Yang Xia"
+date: "2017/9/29"
+output: html_document
+---
+
+I use 2 mapreduce to do the job. 
+First map go through the each letter in the whole corpus and output a pair <letter,1>.
+The reducer then sum them up and out put a pari <letter, totalOccurances>.
+
+Then I had a helper function: sumLetter, which reads the output file of the first job and calculate total number of letters, and come up with score for each letter. The helper function write the pair <letter, Score> into config. to pass into second job.
+
+Second map go through the whole corpus again, and calculate kneighbor score for each word. Out put a bunch of <word, NeighborScore>.
+Second reducer takes in all pairs and calculate mean kneighbor score.

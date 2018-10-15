@@ -1,0 +1,13 @@
+---
+title: "report"
+author: "Yang Xia"
+date: "2017/9/29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I don't really have the time (nor disk space) to run the test.
+
