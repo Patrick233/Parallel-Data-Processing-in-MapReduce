@@ -1,0 +1,174 @@
+---
+title: "A7 - Report"
+author: "Ritvika Reddy, Yang Xia"
+date: "11/3/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##### Local Machine Specifications:
+```
+  Processor Name:	Intel Core i5
+  Processor Speed:	1.6 GHz
+  Number of Processors:	1
+  Total Number of Cores:	2
+  L2 Cache (per Core):	256 KB
+  L3 Cache:	3 MB
+  Memory:	8 GB
+```
+
+#### Implementing K-Means on `Subset Data` for `k=3` in `10 iterations` for:
+
+```{r echo=FALSE}
+loudness_clusters <- read.csv("output/subset/loudness.csv", quote = "")
+length_clusters <- read.csv("output/subset/length.csv", quote = "")
+tempo_clusters <- read.csv("output/subset/tempo.csv", quote = "")
+hotness_clusters <- read.csv("output/subset/hotness.csv", quote = "")
+combinedHotness_clusters <- read.csv("output/subset/artist_hotness_hotness.csv",quote = "")
+
+```
+
+1. Loudness
+---- Cluster with centroid -15.27 is Quiet , -9.59 is Medium and -5.93 is Loud.
+```{r echo=FALSE}
+library(ggplot2)
+
+plot1 <- ggplot(loudness_clusters, aes(x=loudness_clusters$loudness_x,
+                                        y=c(0))
+                 ) + geom_point(aes(color=(loudness_clusters$Centroid_x))) + labs(x="Loudness", y="", title = "Clustering Loudness", color="Centroids") + theme_classic()
+plot1
+
+plot2 <- ggplot(loudness_clusters, aes(x=loudness_x,fill=factor(loudness_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 1)  + labs(x="Loudness", y="", title = "Clustering Loudness", fill="Centroids") + theme_classic()
+plot2
+
+```
+2. Duration
+```{r echo=FALSE}
+plot3 <- ggplot(length_clusters, aes(x=length_clusters$length_x,
+                                        y=c(0))
+                 ) + geom_point(aes(color=(length_clusters$Centroid_x))) + labs(x="Duration", y="", title = "Clustering Duration", color="Centroids") + theme_classic()
+plot3
+
+plot4 <- ggplot(length_clusters, aes(x=length_x,fill=factor(length_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 10)  + labs(x="Duration", y="", title = "Clustering Duration", fill="Centroids") + theme_classic()
+plot4
+
+```
+3. Tempo
+```{r echo=FALSE}
+plot5 <- ggplot(tempo_clusters, aes(x=tempo_clusters$tempo_x,
+                                        y=c(0))
+                 ) + geom_point(aes(color=(tempo_clusters$Centroid_x))) + labs(x="Tempo", y="", title = "Clustering Tempo", color="Centroids") + theme_classic()
+plot5
+
+plot6 <- ggplot(tempo_clusters, aes(x=tempo_x,fill=factor(tempo_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 3.5)  + labs(x="Tempo", y="", title = "Clustering Tempo", fill="Centroids") + theme_classic()
+plot6
+
+```
+4. Song Hotness
+```{r echo=FALSE}
+plot7 <- ggplot(hotness_clusters, aes(x=hotness_clusters$hotness_x,
+                                        y=c(0))
+                 ) + geom_point(aes(color=(hotness_clusters$Centroid_x))) + labs(x="Song Hotness", y="", title = "Clustering Hotness", color="Centroids") + theme_classic()
+plot7
+
+plot8 <- ggplot(hotness_clusters, aes(x=hotness_x,fill=factor(hotness_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 0.025)  + labs(x="Hotness", y="", title = "Clustering Hotness", fill="Centroids") + theme_classic()
+plot8
+
+```
+
+5. Combined Hotness
+```{r echo=FALSE}
+plot9 <- ggplot(combinedHotness_clusters, aes(x=combinedHotness_clusters$artist_hotness_x,
+                                        y=combinedHotness_clusters$hotness_y)
+                 ) + geom_point(aes(color=(combinedHotness_clusters$Centroid_x))) + labs(x="Artist Hotness", y="Song Hotness", title = "Clustering Combined Hotness", color="Centroids") + theme_classic()
+plot9
+
+plot10 <- ggplot(combinedHotness_clusters, aes(x=combinedHotness_clusters$artist_hotness_x, y=combinedHotness_clusters$hotness_y,fill=factor(hotness_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 0.05,stackdir="center")  + labs(x="Artist Hotness", y="Song Hotness", title = "Clustering Combined Hotness", fill="Centroids") + theme_classic()
+plot10
+
+```
+#### Implementing K-Means on `Entire Data` for `k=3` in `10 iterations` for:
+
+```{r echo=FALSE}
+all_loudness_clusters <- read.csv("output/all//loudness.csv", quote = "",strip.white = TRUE,na.string = "")
+all_length_clusters <- read.csv("output/all/length.csv", strip.white = TRUE,quote = "",na.string = "")
+all_tempo_clusters <- read.csv("output/all/tempo.csv", strip.white = TRUE,quote = "",na.string = "")
+all_hotness_clusters <- read.csv("output/all/hotness.csv", strip.white = TRUE,quote = "",na.string = "")
+all_combinedHotness_clusters <- read.csv("output/all/artist_hotness_hotness.csv",strip.white = TRUE,quote = "",na.string = "")
+
+```
+
+1. Loudness
+```{r echo=FALSE, fig.width=20}
+library(ggplot2)
+all_loudness_clusters <- all_loudness_clusters[complete.cases(all_loudness_clusters),] 
+# all_loudness_clusters[-c(1222588,161586,104675,352835,323343,31604)]
+plot11 <- ggplot(all_loudness_clusters, aes(x=all_loudness_clusters$loudness_x,
+                                        y=c(0))
+                 ) + geom_point(aes(color=(all_loudness_clusters$Centroid_x))) + labs(x="Loudness", y="", title = "Clustering Loudness", color="Centroids") + theme_classic()
+plot11
+```
+```{r echo=FALSE}
+# plot12 <- ggplot(all_loudness_clusters, aes(x=loudness_x,fill=factor(all_loudness_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 1)  + labs(x="Loudness", y="", title = "Clustering Loudness", fill="Centroids") + theme_classic()
+# plot12
+```
+2. Duration
+```{r echo=FALSE, fig.width=15}
+plot13 <- ggplot(all_length_clusters[-c(171877,358856,360492,335677,312704)], aes(x=all_length_clusters$length_x,
+                                        y=c(0))
+                 ) + geom_point(aes(color=(all_length_clusters$Centroid_x))) + labs(x="Duration", y="", title = "Clustering Duration", color="Centroids") + theme_classic()
+plot13
+
+# plot14 <- ggplot(all_length_clusters, aes(x=all_length_x,fill=factor(all_length_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 10)  + labs(x="Duration", y="", title = "Clustering Duration", fill="Centroids") + theme_classic()
+# plot14
+```
+3. Tempo
+```{r echo=FALSE, fig.width=15}
+plot15 <- ggplot(all_tempo_clusters, aes(x=all_tempo_clusters$tempo_x,
+                                        y=c(0))
+                 ) + geom_point(aes(color=(all_tempo_clusters$Centroid_x))) + labs(x="Tempo", y="", title = "Clustering Tempo", color="Centroids") + theme_classic()
+plot15
+
+#plot16 <- ggplot(all_tempo_clusters, aes(x=all_tempo_x,fill=factor(all_tempo_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 3.5)  + labs(x="Tempo", y="", title = "Clustering Tempo", fill="Centroids") + theme_classic()
+#plot16
+```
+4. Song Hotness
+```{r echo=FALSE, fig.width=15}
+plot17 <- ggplot(all_hotness_clusters, aes(x=all_hotness_clusters$hotness_x,
+                                        y=c(0))
+                 ) + geom_point(aes(color=(all_hotness_clusters$Centroid_x))) + labs(x="Song Hotness", y="", title = "Clustering Hotness", color="Centroids") + theme_classic()
+plot17
+
+#plot18 <- ggplot(all_hotness_clusters, aes(x=all_hotness_x,fill=factor(all_hotness_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 0.025)  + labs(x="Hotness", y="", title = "Clustering Hotness", fill="Centroids") + theme_classic()
+#plot18
+```
+
+5. Combined Hotness
+```{r echo=FALSE, fig.width=15}
+plot19 <- ggplot(all_combinedHotness_clusters, aes(x=all_combinedHotness_clusters$artist_hotness_x,
+                                        y=all_combinedHotness_clusters$hotness_y)
+                 ) + geom_point(aes(color=(all_combinedHotness_clusters$Centroid_x))) + labs(x="Artist Hotness", y="Song Hotness", title = "Clustering Combined Hotness", color="Centroids") + theme_classic()
+plot19
+
+#plot20 <- ggplot(all_combinedHotness_clusters, aes(x=all_combinedHotness_clusters$artist_hotness_x, y=all_combinedHotness_clusters$hotness_y,fill=factor(all_hotness_clusters$Centroid_x))) + geom_dotplot(dotsize = 0.5, binwidth = 0.05)  + labs(x="Artist Hotness", y="Song Hotness", title = "Clustering Combined Hotness", fill="Centroids") + theme_classic()
+#plot20
+```
+
+#### Performance Times on Subset and Entire Data
+```{r echo=FALSE}
+cat("Time Taken for K-Means on each Metric for Entire Data in millisecs" , "\n")
+cat(readLines("output/all/Time_counter.txt"), sep = "\n")
+cat("\n\n")
+cat("Time Taken for K-Means on each Metric for Subset Data in millisecs" , "\n")
+cat(readLines("output/subset//Time_counter"), sep = "\n")
+
+```
+
+
+#### Conclusions:
+1. We are performing fuzzy clustering because in practical sense, k-means algorithm doesn't converge in 10 iterations for such a large data. We tried to apply the kmeans algorithm provided in R, and it took more than 15 iteration for each metric.
+2. There was a problem sshing into EMR because of which we could not run our code on the cluster, but we are hoping to fix it.
+
