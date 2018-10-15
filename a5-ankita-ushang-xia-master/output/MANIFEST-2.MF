@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Class-Path: hadoop-common-2.8.1.jar hadoop-mapreduce-client-common-2.8
+ .1.jar hadoop-mapreduce-client-core-2.8.1.jar
+Main-Class: ValidationDriver
+
