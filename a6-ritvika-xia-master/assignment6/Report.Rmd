@@ -1,0 +1,144 @@
+---
+title: "Assignment 6: Report"
+author: "Ritvika Reddy, Yang Xia"
+date: "10/26/2017"
+output: pdf_document
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+###Implementation:
+The code was implemented on our local machines. 
+All the results are present in the output folder.
+
+##RESULTS: 
+
+The following outputs are for the entire data.
+
+####Top 5 loudest songs:
+```{r echo=FALSE}
+loudest = read.csv("output/all/top5Loudest", header = FALSE)
+colnames(loudest) <- c('Track_ID','loudness')
+print(loudest)
+```
+
+####Top 5 longest songs:
+```{r echo=FALSE}
+longest = read.csv("output/all/top5longest", header = FALSE)
+colnames(longest) <- c('Track_ID','duration')
+print(longest)
+```
+####Top 5 hottest songs:
+```{r echo=FALSE}
+hottest = read.csv("output/all/top5hottest", header = FALSE)
+colnames(hottest) <- c('Track_ID','song_hotttness')
+print(hottest)
+```
+####Top 5 fastest songs:
+```{r echo=FALSE}
+fastest = read.csv("output/all/top5fastest", header = FALSE)
+colnames(fastest) <- c('Track_ID','tempo')
+print(fastest)
+```
+####Top 5 prolific artists:
+```{r echo=FALSE}
+prolificArtists = read.csv("output/all/prolificArtists", header = FALSE)
+colnames(prolificArtists) <- c('Artist_ID','total_songs')
+prolificArtists <- prolificArtists[order(-prolificArtists$total_songs),]
+print(prolificArtists)
+```
+
+
+####Loading the common words found for the `entire data`.
+```{r echo=FALSE}
+commonWords = read.csv("output/all/commonWords",header = FALSE)
+colnames(commonWords) <- c('Word','Count')
+commonWords <- commonWords[order(-commonWords$Count),]
+```
+The top 5 words are shown in the graph below.
+
+```{r echo=FALSE, fig.height=6, fig.width=8}
+library(ggplot2)
+plot1 <- ggplot(commonWords[1:5,], aes(x=factor(Word),
+                                       y=Count,
+                               fill=factor(Word))) + geom_bar(stat = "identity") + labs(title="Top 5 common words", x="Word", fill="Word")
+
+plot1
+
+```
+
+The top 5 common words along with the number of times they occur in the song titles in the data are shown below.
+
+```{r}
+print(commonWords[1:5,])
+```
+
+####Times taken for different operations on **entire data with persist**:
+```{r echo=FALSE}
+tasksMap = read.csv("output/TasksTable", header = FALSE)
+colnames(tasksMap) <- c('Task','Query performed')
+print(tasksMap)
+timesAll = read.csv("output/Time Counter on whole data",header = FALSE)
+colnames(timesAll) <- c('Task','Time')
+print(timesAll)
+total_time <- timesAll[nrow(timesAll),2]
+timesAll <- timesAll[1:nrow(timesAll)-1,]
+timesAll <- timesAll[order(timesAll$Task),]
+sprintf("Total time taken to execute all queries = %s",total_time)
+plot5 <- ggplot(timesAll, aes(x=Task,
+                           y=timesAll$Time,
+                           fill=Task)) + geom_bar(stat = 'identity') + labs(title="Execution Times for each Task on Entire Data", x="Task", y="Time in millisecs", fill="Task")
+plot5
+
+```
+####Times taken for different operations on the **entire data without persist**:
+
+```{r echo=FALSE}
+library(ggplot2)
+print(tasksMap)
+timesWithoutPersist = read.csv("output/Time Counter without persist",header = FALSE)
+colnames(timesWithoutPersist) <- c('Task','Time')
+print(timesWithoutPersist)
+total_time <- timesWithoutPersist[nrow(timesWithoutPersist),2]
+timesWithoutPersist <- timesWithoutPersist[1:nrow(timesWithoutPersist)-1,]
+timesWithoutPersist <- timesWithoutPersist[order(timesWithoutPersist$Task),]
+sprintf("Total time taken to execute all queries = %s",total_time)
+plot4 <- ggplot(timesWithoutPersist, aes(x=Task,
+                           y=timesWithoutPersist$Time,
+                           fill=Task)) + geom_bar(stat = 'identity')+ labs(title="Execution Times for each Task on Entire Data without Persisting", x="Task", y="Time in millisecs", fill="Task")
+plot4
+```
+
+####Times taken for different operations on the subset of the data **with persist**:
+
+```{r echo=FALSE}
+library(ggplot2)
+tasksMap = read.csv("output/TasksTable", header = FALSE)
+colnames(tasksMap) <- c('Task','Query performed')
+print(tasksMap)
+times = read.csv("output/Time Counter",header = FALSE)
+colnames(times) <- c('Task','Time')
+print(times)
+total_time <- times[nrow(times),2]
+times <- times[1:nrow(times)-1,]
+times <- times[order(times$Task),]
+sprintf("Total time taken to execute all queries = %s",total_time)
+plot3 <- ggplot(times, aes(x=Task,
+                           y=times$Time,
+                           fill=Task)) + geom_bar(stat = 'identity')+ labs(title="Execution Times for each Task on Subset of Data", x="Task", y="Time in millisecs", fill="Task")
+plot3
+```
+
+
+##Conclusions:
+
+We also ran the code on the subset as well as the entire dataset. We observed that the time varies almost linearly. The code took 4.825 minutes to run on the entire dataset and 0.13 minutes to run on the subset with persisting the RDD. Without using the persist for the entire data, the code took 4.39 minutes. 
+
+We can see that for majority of the tasks, the execution time is faster when we do not persist the RDD and keep generating it on the fly. This may not matter as we are running our code in a standalone mode and not in a distributed mode.
+
+
+
+
+
